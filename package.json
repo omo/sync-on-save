@@ -1,0 +1,16 @@
+{
+  "name": "Pushy Notes",
+  "main": "./lib/pushy-notes",
+  "version": "0.0.0",
+  "description": "A short description of your package",
+  "activationCommands": {
+    "atom-workspace": []
+  },
+  "repository": "https://github.com/atom/pushy-notes",
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "dependencies": {
+  }
+}

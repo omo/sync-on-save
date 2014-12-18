@@ -1,0 +1,22 @@
+# See https://atom.io/docs/latest/creating-a-package#menus for more details
+'context-menu':
+  'atom-text-editor': [
+    {
+      'label': 'Sync notes'
+      'command': 'pushy-notes:sync'
+    }
+  ]
+'menu': [
+  {
+    'label': 'File'
+    'submenu': [
+      'label': 'Pushy Notes'
+      'submenu': [
+        {
+          'label': 'Sync notes'
+          'command': 'pushy-notes:sync'
+        }
+      ]
+    ]
+  }
+]
