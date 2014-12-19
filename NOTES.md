@@ -8,4 +8,3 @@ Tasks:
  * Show progress indicator
  * Add throttling
  * Publish
- 

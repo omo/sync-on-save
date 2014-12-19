@@ -2,15 +2,15 @@
 fs = require 'fs'
 path = require 'path'
 
-module.exports = PushyNotes =
+module.exports = SyncOnSave =
   subscriptions: null
 
   activate: (state) ->
     # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
     @subscriptions = new CompositeDisposable
-    @subscriptions.add atom.commands.add 'atom-workspace', 'pushy-notes:sync': => @syncProject()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'pushy-notes:enable-sync': => @enableSync()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'pushy-notes:disable-sync': => @disableSync()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'sync-on-save:sync': => @syncProject()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'sync-on-save:enable-sync': => @enableSync()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'sync-on-save:disable-sync': => @disableSync()
     @subscriptions.add atom.workspace.observeTextEditors((editor) => @_editorGiven(editor))
 
   deactivate: ->

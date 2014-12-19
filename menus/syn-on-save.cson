@@ -3,7 +3,7 @@
   'atom-text-editor': [
     {
       'label': 'Sync notes'
-      'command': 'pushy-notes:sync'
+      'command': 'sync-on-save:sync'
     }
   ]
 'menu': [
@@ -14,7 +14,7 @@
       'submenu': [
         {
           'label': 'Sync notes'
-          'command': 'pushy-notes:sync'
+          'command': 'sync-on-save:sync'
         }
       ]
     ]

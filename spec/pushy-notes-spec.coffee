@@ -1,40 +1,40 @@
-PushyNotes = require '../lib/pushy-notes'
+SyncOnSave = require '../lib/sync-on-save'
 
 # Use the command `window:run-package-specs` (cmd-alt-ctrl-p) to run specs.
 #
 # To run a specific `it` or `describe` block add an `f` to the front (e.g. `fit`
 # or `fdescribe`). Remove the `f` to unfocus the block.
 
-describe "PushyNotes", ->
+describe "SyncOnSave", ->
   [workspaceElement, activationPromise] = []
 
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
-    activationPromise = atom.packages.activatePackage('pushy-notes')
+    activationPromise = atom.packages.activatePackage('sync-on-save')
 
-  describe "when the pushy-notes:toggle event is triggered", ->
+  describe "when the sync-on-save:toggle event is triggered", ->
     it "hides and shows the modal panel", ->
       # Before the activation event the view is not on the DOM, and no panel
       # has been created
-      expect(workspaceElement.querySelector('.pushy-notes')).not.toExist()
+      expect(workspaceElement.querySelector('.sync-on-save')).not.toExist()
 
       # This is an activation event, triggering it will cause the package to be
       # activated.
-      atom.commands.dispatch workspaceElement, 'pushy-notes:toggle'
+      atom.commands.dispatch workspaceElement, 'sync-on-save:toggle'
 
       waitsForPromise ->
         activationPromise
 
       runs ->
-        expect(workspaceElement.querySelector('.pushy-notes')).toExist()
+        expect(workspaceElement.querySelector('.sync-on-save')).toExist()
 
-        pushyNotesElement = workspaceElement.querySelector('.pushy-notes')
-        expect(pushyNotesElement).toExist()
+        syncOnSaveElement = workspaceElement.querySelector('.sync-on-save')
+        expect(syncOnSaveElement).toExist()
 
-        pushyNotesPanel = atom.workspace.panelForItem(pushyNotesElement)
-        expect(pushyNotesPanel.isVisible()).toBe true
-        atom.commands.dispatch workspaceElement, 'pushy-notes:toggle'
-        expect(pushyNotesPanel.isVisible()).toBe false
+        syncOnSavePanel = atom.workspace.panelForItem(syncOnSaveElement)
+        expect(syncOnSavePanel.isVisible()).toBe true
+        atom.commands.dispatch workspaceElement, 'sync-on-save:toggle'
+        expect(syncOnSavePanel.isVisible()).toBe false
 
     it "hides and shows the view", ->
       # This test shows you an integration test testing at the view level.
@@ -45,18 +45,18 @@ describe "PushyNotes", ->
       # workspaceElement to the DOM are generally slower than those off DOM.
       jasmine.attachToDOM(workspaceElement)
 
-      expect(workspaceElement.querySelector('.pushy-notes')).not.toExist()
+      expect(workspaceElement.querySelector('.sync-on-save')).not.toExist()
 
       # This is an activation event, triggering it causes the package to be
       # activated.
-      atom.commands.dispatch workspaceElement, 'pushy-notes:toggle'
+      atom.commands.dispatch workspaceElement, 'sync-on-save:toggle'
 
       waitsForPromise ->
         activationPromise
 
       runs ->
         # Now we can test for view visibility
-        pushyNotesElement = workspaceElement.querySelector('.pushy-notes')
-        expect(pushyNotesElement).toBeVisible()
-        atom.commands.dispatch workspaceElement, 'pushy-notes:toggle'
-        expect(pushyNotesElement).not.toBeVisible()
+        syncOnSaveElement = workspaceElement.querySelector('.sync-on-save')
+        expect(syncOnSaveElement).toBeVisible()
+        atom.commands.dispatch workspaceElement, 'sync-on-save:toggle'
+        expect(syncOnSaveElement).not.toBeVisible()
