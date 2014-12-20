@@ -9,7 +9,7 @@ module.exports = class Syncer
   constructor: ->
     @emitter = new EventEmitter()
 
-  runSyncCommands: (path) ->
+  runSyncCommands: (path = @getProjectRoot()) ->
     @emitter.emit('will-sync')
     @makeRunner(path, "git", ["add", "."]).run(
     ).then( =>

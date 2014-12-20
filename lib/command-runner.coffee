@@ -31,7 +31,7 @@ class CommandRunner
     d.promise
 
   _makeResult: (code) ->
-    { self: this, args: @args, code: code, stdout: @stdoutLines, stderr: @stderrLines }
+    { self: this, cwd: @cwd, args: @args, code: code, stdout: @stdoutLines, stderr: @stderrLines }
 
   _doneWith: (deferred, code) ->
     if 0 == code
