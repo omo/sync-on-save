@@ -4,6 +4,7 @@ Q = require 'q'
 
 {CompositeDisposable} = require 'atom'
 Syncer = require './syncer'
+{StatusBarSyncOnSave} = require './status-bar'
 
 module.exports = SyncOnSave =
   subscriptions: null
@@ -17,8 +18,16 @@ module.exports = SyncOnSave =
     @subscriptions.add atom.workspace.observeTextEditors((editor) => @_editorGiven(editor))
     @syncer = new Syncer()
 
+    atom.packages.onDidActivateAll =>
+      @statusBar = document.querySelector("status-bar")
+      e = new StatusBarSyncOnSave()
+      @syncer.onWillSync(e.willSync.bind(e))
+      @syncer.onDidSync(e.didSync.bind(e))
+      @statusBar?.addRightTile(item: e, priority: 100)
+
   deactivate: ->
     @subscriptions.dispose()
+    # FIXME: Remove status bar item.a
 
   serialize: ->
     {}
@@ -44,12 +53,13 @@ module.exports = SyncOnSave =
 
   _editorGiven: (editor) ->
     @subscriptions.add editor.onDidSave =>
-      @syncer.shouldEnable().then =>
-        @syncProject()
+      @syncer.shouldEnable().then (p) =>
+        @syncProject() if p
 
   _handleSyncResult: (p) ->
     p.catch (res) =>
-      stderrText = "Git error" + res.cwd + ":\n" + res.stderr.join("\n")
+      return if res.stdout.join("").match("working directory clean")
+      stderrText = "Git error #{res.cwd} #{res.args.join(' ')}: \n" + res.stderr.join("\n")
       console.log(stderrText)
       atom.notifications.addError stderrText
       Q(res)

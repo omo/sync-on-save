@@ -19,13 +19,12 @@ module.exports = class Syncer
       @makeRunner(path, "git", ["pull"]).run()
     ).then( =>
       @makeRunner(path, "git", ["push"]).run()
-    ).then( =>
+    ).fin( =>
       @emitter.emit('did-sync')
-      0
     )
 
   onWillSync: (l) -> @emitter.on('will-sync', l)
-  onDidSync: (l) -> @emitter.on('will-sync', l)
+  onDidSync: (l) -> @emitter.on('did-sync', l)
 
   getProjectRoot: -> atom.project.rootDirectory.getPath()
   getDotGitPath: -> path.join(atom.project.rootDirectory.getPath(), ".git")
