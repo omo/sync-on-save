@@ -10,7 +10,7 @@
   {
     'label': 'File'
     'submenu': [
-      'label': 'Pushy Notes'
+      'label': 'Sync on Save'
       'submenu': [
         {
           'label': 'Sync notes'

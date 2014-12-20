@@ -1,6 +1,9 @@
-{CompositeDisposable, BufferedProcess} = require 'atom'
 fs = require 'fs'
 path = require 'path'
+Q = require 'q'
+
+{CompositeDisposable, BufferedProcess} = require 'atom'
+CommandRunner = require './command-runner'
 
 module.exports = SyncOnSave =
   subscriptions: null
@@ -23,32 +26,44 @@ module.exports = SyncOnSave =
     @sync(atom.project.rootDirectory.getPath())
 
   enableSync: ->
-    enabler = @getEnabler()
-    fs.exists(enabler, (e) => fs.openSync(enabler, 'w') unless e)
+    @_createTouchFileIfNeeded()
 
   disableSync: ->
-    enabler = @getEnabler()
-    fs.exists(enabler, (e) => fs.unlinkSync(enabler) if e)
+    @_deleteTouchFileIfNeeded()
 
   sync: (path) ->
-    # FIXME: Pass meaningful commit message.
-    @_runGit(
-      path, ["add", "."]
+    @_makeRunner(path, "git", ["add", "."]).run(
     ).then(
-      => @_runGit(path, ["commit", "-m", "Sync."])
+      # FIXME: Pass meaningful commit message.
+      => @_makeRunner(path, "git", ["commit", "-m", "Sync."]).run()
     ).then(
-      => @_runGit(path, ["pull"])
+      => @_makeRunner(path, "git", ["pull"]).run()
     ).then(
-      => @_runGit(path, ["push"])
+      => @_makeRunner(path, "git", ["push"]).run()
     ).then(
-      => 0 # FIXME: Show toast-like notification
+      => 0
     ).catch((res) =>
       # FIXME: Notify user properly.
       console.log(res.stderr.join("\n"))
+      res
     )
 
   getEnabler: ->
     path.join(atom.project.rootDirectory.getPath(), ".git", "sync-on-save")
+
+  _createTouchFileIfNeeded: ->
+    d = Q.defer()
+    enabler = @getEnabler()
+    fs.exists enabler, (e) =>
+      fs.open(enabler, 'w', -> d.resolve()) unless e
+    d.promise
+
+  _deleteTouchFileIfNeeded: ->
+    d = Q.defer()
+    enabler = @getEnabler()
+    fs.exists enabler, (e) =>
+      fs.unlink(enabler, -> d.resolve()) if e
+    d.promise
 
   _editorGiven: (editor) ->
     @subscriptions.add editor.onDidSave () =>
@@ -57,27 +72,5 @@ module.exports = SyncOnSave =
         @syncProject() if exist
       )
 
-  _runGit: (cwd, args) ->
-    return new Promise((res, rej) =>
-      stdoutLines = []
-      stderrLines = []
-      new BufferedProcess(
-        options:
-          cwd: cwd
-        command: "git"
-        args: args
-        stderr: (line) =>
-          @_trace(line)
-          stderrLines.push(line)
-        stdout: (line) =>
-          @_trace(line)
-          stdoutLines.push(line)
-        exit: (code) =>
-          if 0 == code
-            res(args: args, code: code, stdout: stdoutLines, stderr: stderrLines)
-          else
-            rej(args: args, code: code, stdout: stdoutLines, stderr: stderrLines)
-      ))
-
-  _trace: (line) ->
-    console.log(line)
+  _makeRunner: (cwd, cmd, args) ->
+    new CommandRunner(cwd, cmd, args)
