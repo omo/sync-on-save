@@ -1,22 +1,31 @@
 fs = require 'fs'
 path = require 'path'
 Q = require 'q'
+{EventEmitter} = require('events')
 
 CommandRunner = require './command-runner'
 
 module.exports = class Syncer
+  constructor: ->
+    @emitter = new EventEmitter()
+
   runSyncCommands: (path) ->
+    @emitter.emit('will-sync')
     @makeRunner(path, "git", ["add", "."]).run(
-    ).then(
+    ).then( =>
       # FIXME: Pass meaningful commit message.
-      => @makeRunner(path, "git", ["commit", "-m", "Sync."]).run()
-    ).then(
-      => @makeRunner(path, "git", ["pull"]).run()
-    ).then(
-      => @makeRunner(path, "git", ["push"]).run()
-    ).then(
-      => 0
+      @makeRunner(path, "git", ["commit", "-m", "Sync."]).run()
+    ).then( =>
+      @makeRunner(path, "git", ["pull"]).run()
+    ).then( =>
+      @makeRunner(path, "git", ["push"]).run()
+    ).then( =>
+      @emitter.emit('did-sync')
+      0
     )
+
+  onWillSync: (l) -> @emitter.on('will-sync', l)
+  onDidSync: (l) -> @emitter.on('will-sync', l)
 
   getProjectRoot: -> atom.project.rootDirectory.getPath()
   getDotGitPath: -> path.join(atom.project.rootDirectory.getPath(), ".git")

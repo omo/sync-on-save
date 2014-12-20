@@ -27,7 +27,7 @@ module.exports = SyncOnSave =
     @_handleSyncResult(@syncer.runSyncCommands(root))
 
   enableSync: ->
-    @syncer.createTouchFileIfNeeded().then( =>
+    @syncer.createTouchFileIfNeeded().then(=>
       atom.notifications.addSuccess "Sync-to-Save is enabled."
     ).catch((e) =>
       atom.notifications.addError e
@@ -41,6 +41,9 @@ module.exports = SyncOnSave =
       atom.notifications.addError e
       Q(e)
     )
+
+  _getStatusBar: ->
+    document.querySelector('status-bar')
 
   _editorGiven: (editor) ->
     @subscriptions.add editor.onDidSave =>

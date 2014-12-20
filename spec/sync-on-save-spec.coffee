@@ -4,6 +4,7 @@ fs = require 'fs'
 
 SyncOnSave = require '../lib/sync-on-save'
 CommandRunner = require '../lib/command-runner'
+{FakeRunnerMaker} = require './utils'
 
 describe "SyncOnSave", ->
   testEnablerPath = "/tmp/sync-on-save-test-enabler"
@@ -34,15 +35,11 @@ describe "SyncOnSave", ->
 
   describe "when the editor saves the buffer, sync is initiated", ->
     it "Trigger a file save.", ->
-      runners = []
-      target.mainModule.syncer.makeRunner = (cwd, cmd, args) ->
-        fake = new CommandRunner.Fake(cwd, cmd, args)
-        fake.setReturnCode(0)
-        runners.push(runners)
-        fake
+      runners = new FakeRunnerMaker()
+      target.mainModule.syncer.makeRunner = runners.makePassingRunner.bind(runners)
       waitsForPromise ->
         target.mainModule.syncProject().then (r) ->
-          expect(runners.length).toBe 4
+          expect(runners.getLength()).toBe 4
 
   describe "when sync failed", ->
     it "shows an error notification", ->
