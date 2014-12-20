@@ -24,7 +24,7 @@ module.exports = SyncOnSave =
     {}
 
   syncProject: ->
-    @_sync(@syncer.getProjectRoot())
+    @_handleSyncResult(@syncer.runSyncCommands(root))
 
   enableSync: ->
     @syncer.createTouchFileIfNeeded().then( =>
@@ -47,8 +47,8 @@ module.exports = SyncOnSave =
       @syncer.shouldSync().then =>
         @syncProject()
 
-  _sync: (root) ->
-    @syncer.runSyncCommands(root).catch (res) =>
+  _handleSyncResult: (p) ->
+    p.catch (res) =>
       stderrText = "Git error:\n" + res.stderr.join("\n")
       console.log(stderrText)
       atom.notifications.addError stderrText

@@ -6,14 +6,14 @@ CommandRunner = require './command-runner'
 
 module.exports = class Syncer
   runSyncCommands: (path) ->
-    @_makeRunner(path, "git", ["add", "."]).run(
+    @makeRunner(path, "git", ["add", "."]).run(
     ).then(
       # FIXME: Pass meaningful commit message.
-      => @_makeRunner(path, "git", ["commit", "-m", "Sync."]).run()
+      => @makeRunner(path, "git", ["commit", "-m", "Sync."]).run()
     ).then(
-      => @_makeRunner(path, "git", ["pull"]).run()
+      => @makeRunner(path, "git", ["pull"]).run()
     ).then(
-      => @_makeRunner(path, "git", ["push"]).run()
+      => @makeRunner(path, "git", ["push"]).run()
     ).then(
       => 0
     )
@@ -45,5 +45,5 @@ module.exports = class Syncer
         fs.unlink(enabler, -> d.resolve()) if e
     d.promise
 
-  _makeRunner: (cwd, cmd, args) ->
+  makeRunner: (cwd, cmd, args) ->
     new CommandRunner(cwd, cmd, args)

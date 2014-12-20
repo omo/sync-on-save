@@ -35,7 +35,7 @@ describe "SyncOnSave", ->
   describe "when the editor saves the buffer, sync is initiated", ->
     it "Trigger a file save.", ->
       runners = []
-      target.mainModule.syncer._makeRunner = (cwd, cmd, args) ->
+      target.mainModule.syncer.makeRunner = (cwd, cmd, args) ->
         fake = new CommandRunner.Fake(cwd, cmd, args)
         fake.setReturnCode(0)
         runners.push(runners)
