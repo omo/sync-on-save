@@ -26,10 +26,20 @@ module.exports = SyncOnSave =
     @sync(atom.project.rootDirectory.getPath())
 
   enableSync: ->
-    @_createTouchFileIfNeeded()
+    @_createTouchFileIfNeeded().then( =>
+      atom.notifications.addSuccess "Sync-to-Save is enabled."
+    ).catch((e) =>
+      atom.notifications.addError e
+      Q(e)
+    )
 
   disableSync: ->
-    @_deleteTouchFileIfNeeded()
+    @_deleteTouchFileIfNeeded().then( =>
+      atom.notifications.addSuccess "Sync-to-Save is disabled."
+    ).catch((e) =>
+      atom.notifications.addError e
+      Q(e)
+    )
 
   sync: (path) ->
     @_makeRunner(path, "git", ["add", "."]).run(
@@ -45,8 +55,11 @@ module.exports = SyncOnSave =
     ).catch((res) =>
       # FIXME: Notify user properly.
       console.log(res.stderr.join("\n"))
-      res
+      Q(res)
     )
+
+  getDotGitPath: ->
+    path.join(atom.project.rootDirectory.getPath(), ".git")
 
   getEnabler: ->
     path.join(atom.project.rootDirectory.getPath(), ".git", "sync-on-save")
@@ -54,15 +67,19 @@ module.exports = SyncOnSave =
   _createTouchFileIfNeeded: ->
     d = Q.defer()
     enabler = @getEnabler()
-    fs.exists enabler, (e) =>
-      fs.open(enabler, 'w', -> d.resolve()) unless e
+    fs.exists @getDotGitPath(), (fe)=>
+      return d.reject(".git directory is not found") unless fe
+      fs.exists enabler, (e) =>
+        fs.open(enabler, 'w', -> d.resolve()) unless e
     d.promise
 
   _deleteTouchFileIfNeeded: ->
     d = Q.defer()
-    enabler = @getEnabler()
-    fs.exists enabler, (e) =>
-      fs.unlink(enabler, -> d.resolve()) if e
+    fs.exists @getDotGitPath(), (fe)=>
+      return d.reject(".git directory is not found") unless fe
+      enabler = @getEnabler()
+      fs.exists enabler, (e) =>
+        fs.unlink(enabler, -> d.resolve()) if e
     d.promise
 
   _editorGiven: (editor) ->
