@@ -8,6 +8,7 @@ CommandRunner = require '../lib/command-runner'
 describe "SyncOnSave", ->
   testEnablerPath = "/tmp/sync-on-save-test-enabler"
   testDotGitPath = "/tmp/sync-on-save-test-dot-git"
+  testProjectRoot = "/tmp/sync-project-root"
 
   [workspaceElement, target, subscriptions, addedNotifications] = []
 
@@ -21,6 +22,8 @@ describe "SyncOnSave", ->
     fs.rmdirSync(testDotGitPath) if fs.existsSync(testDotGitPath)
     fs.mkdirSync(testDotGitPath)
     fs.unlinkSync(testEnablerPath) if fs.existsSync(testEnablerPath)
+    fs.mkdirSync(testProjectRoot) unless fs.existsSync(testProjectRoot)
+
     workspaceElement = atom.views.getView(atom.workspace)
     waitsForPromise ->
       atom.packages.activatePackage('sync-on-save').then (pack) ->
@@ -32,8 +35,7 @@ describe "SyncOnSave", ->
   describe "when the editor saves the buffer, sync is initiated", ->
     it "Trigger a file save.", ->
       runners = []
-      target.mainModule._makeRunner = (cwd, cmd, args) ->
-        console.log(args)
+      target.mainModule.syncer._makeRunner = (cwd, cmd, args) ->
         fake = new CommandRunner.Fake(cwd, cmd, args)
         fake.setReturnCode(0)
         runners.push(runners)
@@ -42,10 +44,21 @@ describe "SyncOnSave", ->
         target.mainModule.syncProject().then (r) ->
           expect(runners.length).toBe 4
 
+  describe "when sync failed", ->
+    it "shows an error notification", ->
+      CommandRunner.showTrace = true
+      target.mainModule.syncer.getProjectRoot = -> testProjectRoot
+      waitsForPromise -> target.mainModule.syncProject().then ->
+        expect(addedNotifications.length).toBe 1
+        expect(addedNotifications[0].getType()).toBe 'error'
+
   describe "when it is toggled", ->
+    fakePaths = ->
+      target.mainModule.syncer.getDotGitPath = -> testDotGitPath
+      target.mainModule.syncer.getEnabler = -> testEnablerPath
+
     it "It creates or deletes a file.", ->
-      target.mainModule.getDotGitPath = -> testDotGitPath
-      target.mainModule.getEnabler = -> testEnablerPath
+      fakePaths()
       waitsForPromise -> target.mainModule.enableSync().then ->
         expect(fs.existsSync(testEnablerPath)).toBe true
         expect(addedNotifications.length).toBe 1
@@ -54,12 +67,14 @@ describe "SyncOnSave", ->
           expect(addedNotifications.length).toBe 2
 
     it "Shows errors if dot-git dir isn't there.", ->
+      fakePaths()
       fs.rmdirSync(testDotGitPath)
       waitsForPromise -> target.mainModule.enableSync().then ->
         expect(addedNotifications.length).toBe 1
         expect(addedNotifications[0].getType()).toBe 'error'
 
     it "Show errors even for disabling case.", ->
+      fakePaths()
       fs.rmdirSync(testDotGitPath)
       waitsForPromise -> target.mainModule.disableSync().then ->
         expect(addedNotifications.length).toBe 1

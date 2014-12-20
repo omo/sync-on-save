@@ -4,10 +4,11 @@
 Q = require('q')
 
 class CommandRunner
+  @showTrace = false
+
   constructor: (@cwd, @command, @args) ->
     @stdoutLines = []
     @stderrLines = []
-    @showTrace = false
 
   run: ->
     d = Q.defer()
@@ -39,7 +40,7 @@ class CommandRunner
       deferred.reject(@_makeResult(code))
 
   _trace: (line) ->
-    if @showTrace
+    #if @showTrace
       console.log(line)
 
 
