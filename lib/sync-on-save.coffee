@@ -42,9 +42,6 @@ module.exports = SyncOnSave =
       Q(e)
     )
 
-  _getStatusBar: ->
-    document.querySelector('status-bar')
-
   _editorGiven: (editor) ->
     @subscriptions.add editor.onDidSave =>
       @syncer.shouldSync().then =>
