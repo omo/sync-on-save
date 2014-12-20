@@ -2,11 +2,11 @@
   "name": "sync-on-save",
   "main": "./lib/sync-on-save",
   "version": "0.0.0",
-  "description": "A short description of your package",
+  "description": "A save-time hook to automatically push your change",
   "activationCommands": {
     "atom-workspace": []
   },
-  "repository": "https://github.com/atom/sync-on-save",
+  "repository": "https://github.com/omo/sync-on-save",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
