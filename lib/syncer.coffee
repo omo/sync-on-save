@@ -8,8 +8,14 @@ CommandRunner = require './command-runner'
 module.exports = class Syncer
   constructor: ->
     @emitter = new EventEmitter()
+    @_isSyncing = false
+
+  runSyncCommandsIfPossible: (path = @getProjectRoot()) ->
+    return Q(0) if @isSyncing()
+    @runSyncCommands(path)
 
   runSyncCommands: (path = @getProjectRoot()) ->
+    @_isSyncing = true
     @emitter.emit('will-sync')
     @makeRunner(path, "git", ["add", "."]).run(
     ).then( =>
@@ -20,6 +26,7 @@ module.exports = class Syncer
     ).then( =>
       @makeRunner(path, "git", ["push"]).run()
     ).fin( =>
+      @_isSyncing = false
       @emitter.emit('did-sync')
     )
 
@@ -29,6 +36,7 @@ module.exports = class Syncer
   getProjectRoot: -> atom.project.rootDirectory.getPath()
   getDotGitPath: -> path.join(atom.project.rootDirectory.getPath(), ".git")
   getEnabler: -> path.join(atom.project.rootDirectory.getPath(), ".git", "sync-on-save")
+  isSyncing: -> @_isSyncing
 
   shouldEnable: ->
     d = Q.defer()

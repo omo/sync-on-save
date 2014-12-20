@@ -33,7 +33,7 @@ module.exports = SyncOnSave =
     {}
 
   syncProject: ->
-    @_handleSyncResult(@syncer.runSyncCommands())
+    @_handleSyncResult(@syncer.runSyncCommandsIfPossible())
 
   enableSync: ->
     @syncer.createTouchFileIfNeeded().then(=>
