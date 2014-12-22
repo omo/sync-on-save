@@ -1,4 +1,5 @@
 fs = require 'fs'
+Q = require 'q'
 
 {CompositeDisposable} = require 'atom'
 
@@ -37,6 +38,7 @@ describe "SyncOnSave", ->
     it "Trigger a file save.", ->
       runners = new FakeRunnerMaker()
       target.mainModule.syncer.makeRunner = runners.makePassingRunner.bind(runners)
+      target.mainModule.syncer.getChangedFiles = -> Q(["hello.js"])
       waitsForPromise ->
         target.mainModule.syncProject().then (r) ->
           expect(runners.getLength()).toBe 4

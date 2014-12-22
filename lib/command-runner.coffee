@@ -45,8 +45,8 @@ class CommandRunner
 
 
 class FakeCommandRunner extends CommandRunner
-  setReturnCode: (code) ->
-    @returnCode = code
+  setReturnCode: (code) -> @returnCode = code
+  setStdout: (stdout) -> @stdoutLines = stdout
 
   run: ->
     d = Q.defer()
