@@ -10,4 +10,9 @@ module.exports.FakeRunnerMaker = class FakeRunnerMaker
     @list.push(fake)
     fake
 
+  makePassingRunnerWithStdout: (stdout, cwd, cmd, args) ->
+    fake = @makePassingRunner(cwd, cmd, args)
+    fake.setStdout(stdout)
+    fake
+
   getLength: -> @list.length

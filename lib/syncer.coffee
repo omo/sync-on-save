@@ -6,29 +6,47 @@ Q = require 'q'
 CommandRunner = require './command-runner'
 
 module.exports = class Syncer
+  NO_NEED_TO_CHANGE: "No need to change"
+
   constructor: ->
     @emitter = new EventEmitter()
     @_isSyncing = false
 
-  runSyncCommandsIfPossible: (path = @getProjectRoot()) ->
+  runSyncCommandsIfPossible: (cwd = @getProjectRoot()) ->
     return Q(0) if @isSyncing()
-    @runSyncCommands(path)
+    @runSyncCommands(cwd)
 
-  runSyncCommands: (path = @getProjectRoot()) ->
+  runSyncCommands: (cwd = @getProjectRoot()) ->
     @_isSyncing = true
     @emitter.emit('will-sync')
-    @makeRunner(path, "git", ["add", "."]).run(
+    @makeRunner(cwd, "git", ["add", "."]).run(
     ).then( =>
-      # FIXME: Pass meaningful commit message.
-      @makeRunner(path, "git", ["commit", "-m", "Sync."]).run()
+      @getChangedFiles(cwd)
+    ).then( (filenames) =>
+      if 0 == filenames.length
+        throw @NO_NEED_TO_CHANGE
+      @makeRunner(cwd, "git", ["commit", "-m", @createCommitMessage(filenames)]).run()
     ).then( =>
-      @makeRunner(path, "git", ["pull"]).run()
+      @makeRunner(cwd, "git", ["pull"]).run()
     ).then( =>
-      @makeRunner(path, "git", ["push"]).run()
+      @makeRunner(cwd, "git", ["push"]).run()
+    ).catch((e) =>
+      console.log(e)
+      return Q(0) if (e == @NO_NEED_TO_CHANGE)
+      throw e
     ).fin( =>
       @_isSyncing = false
       @emitter.emit('did-sync')
     )
+
+  createCommitMessage: (filenames) ->
+    if 1 < filenames.length
+      "Updated #{filenames[0]} and #{filenames.length - 1} file(s)."
+    else
+      "Updated #{filenames[0]}."
+
+  getChangedFiles: (cwd) ->
+    @makeRunner(cwd, "git", ["diff", "--name-only", "HEAD"]).run().then (r) => r.stdout.map (l) -> path.basename(l).replace(/\n/, "")
 
   onWillSync: (l) -> @emitter.on('will-sync', l)
   onDidSync: (l) -> @emitter.on('did-sync', l)
