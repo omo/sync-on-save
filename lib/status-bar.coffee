@@ -13,4 +13,4 @@ class StatusBarSyncOnSaveBase extends HTMLElement
   createdCallback: ->
     @initialize()
 
-module.exports.StatusBarSyncOnSave = document.registerElement("status-save-on-sync", prototype: StatusBarSyncOnSaveBase.prototype)
+module.exports.StatusBarSyncOnSave = document.registerElement("status-sync-on-save", prototype: StatusBarSyncOnSaveBase.prototype)
