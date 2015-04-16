@@ -18,7 +18,7 @@ module.exports = SyncOnSave =
     @subscriptions.add atom.workspace.observeTextEditors((editor) => @_editorGiven(editor))
     @syncer = new Syncer()
 
-    atom.packages.onDidActivateAll =>
+    atom.packages.onDidActivateInitialPackages =>
       @statusBar = document.querySelector("status-bar")
       e = new StatusBarSyncOnSave()
       @syncer.onWillSync(e.willSync.bind(e))
@@ -27,7 +27,7 @@ module.exports = SyncOnSave =
 
   deactivate: ->
     @subscriptions.dispose()
-    # FIXME: Remove status bar item.a
+    # FIXME: Remove status bar item.
 
   serialize: ->
     {}

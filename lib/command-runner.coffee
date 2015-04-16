@@ -14,7 +14,8 @@ class CommandRunner
     d = Q.defer()
     p = new BufferedProcess
       options:
-        cwd: @cwd
+        cwd: @cwd,
+        env: process.env
       command: @command
       args: @args
       stderr: (line) =>

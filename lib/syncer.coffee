@@ -51,9 +51,12 @@ module.exports = class Syncer
   onWillSync: (l) -> @emitter.on('will-sync', l)
   onDidSync: (l) -> @emitter.on('did-sync', l)
 
-  getProjectRoot: -> atom.project.rootDirectory.getPath()
-  getDotGitPath: -> path.join(atom.project.rootDirectory.getPath(), ".git")
-  getEnabler: -> path.join(atom.project.rootDirectory.getPath(), ".git", "sync-on-save")
+  getProjectRoot: ->
+    # FIXME: Should support multi-folder projects
+    atom.project.getPaths()[0]
+
+  getDotGitPath: -> path.join(@getProjectRoot(), ".git")
+  getEnabler: -> path.join(@getProjectRoot(), ".git", "sync-on-save")
   isSyncing: -> @_isSyncing
 
   shouldEnable: ->
