@@ -1,7 +1,7 @@
 {
   "name": "sync-on-save",
   "main": "./lib/sync-on-save",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A save-time hook to automatically push your change",
   "activationCommands": {
     "atom-workspace": []
