@@ -24,6 +24,18 @@ describe "CommandRunner", ->
           expect(r.code).not.toBe 0
         )
 
+  describe "when it needs workaround", ->
+    it "runs bash", ->
+      c = new CommandRunner("/", "echo", ["hello"])
+      c._needsWorkaround = -> true
+      expect(c.getCommand()).toBe "bash"
+      expect(c.getArgs()).toEqual ["-c", "echo \"hello\""]
+
+    it "escapes double quotes", ->
+      c = new CommandRunner("/", "ls", ["\"My Document\""])
+      c._needsWorkaround = -> true
+      expect(c.getArgs()).toEqual ["-c", "ls \"\\\"My Document\\\"\""]
+
 describe "CommandRunner.Fake", ->
 
   describe "when run is invoked", ->

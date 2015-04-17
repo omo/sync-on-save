@@ -59,7 +59,7 @@ module.exports = SyncOnSave =
   _handleSyncResult: (p) ->
     p.catch (res) =>
       return if res.stdout.join("").match("working directory clean")
-      stderrText = "Git error #{res.cwd} #{res.args.join(' ')}: \n" + res.stderr.join("\n")
+      stderrText = "Error #{res.cwd}: #{res.command} #{res.args.join(' ')}: \n" + res.stderr.join("\n")
       console.log(stderrText)
       atom.notifications.addError stderrText
       Q(res)

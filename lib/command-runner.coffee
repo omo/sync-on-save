@@ -6,7 +6,7 @@ Q = require('q')
 class CommandRunner
   @showTrace = false
 
-  constructor: (@cwd, @command, @args) ->
+  constructor: (@cwd, @command = "", @args = []) ->
     @stdoutLines = []
     @stderrLines = []
 
@@ -14,10 +14,9 @@ class CommandRunner
     d = Q.defer()
     p = new BufferedProcess
       options:
-        cwd: @cwd,
-        env: process.env
-      command: @command
-      args: @args
+        cwd: @cwd
+      command: @getCommand()
+      args: @getArgs()
       stderr: (line) =>
         @_trace(line)
         @stderrLines.push(line)
@@ -31,8 +30,30 @@ class CommandRunner
       d.reject(@_makeResult(undefined))
     d.promise
 
+  getCommand: ->
+    if @_needsWorkaround()
+      "bash"
+    else
+      @command
+
+  getArgs: ->
+    if @_needsWorkaround()
+      [
+        "-c",
+        [@command].concat(@args.map((i) ->
+          "\"" + i.replace(/\"/g, "\\\"") + "\""
+        )).join(" ")
+      ]
+    else
+      @command
+
+  # These "darwin" check is a workaround for a Yosemite bug. See
+  # http://stackoverflow.com/questions/24022582/osx-10-10-yosemite-beta-on-git-pull-git-sh-setup-no-such-file-or-directory/24044478
+  _needsWorkaround: ->
+    process.platform == "darwin"
+
   _makeResult: (code) ->
-    { self: this, cwd: @cwd, args: @args, code: code, stdout: @stdoutLines, stderr: @stderrLines }
+    { self: this, cwd: @cwd, originalArgs: @args, command: @getCommand(), args: @getArgs(), code: code, stdout: @stdoutLines, stderr: @stderrLines }
 
   _doneWith: (deferred, code) ->
     if 0 == code
