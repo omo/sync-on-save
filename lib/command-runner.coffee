@@ -45,7 +45,7 @@ class CommandRunner
         )).join(" ")
       ]
     else
-      [@command]
+      @args
 
   # These "darwin" check is a workaround for a Yosemite bug. See
   # http://stackoverflow.com/questions/24022582/osx-10-10-yosemite-beta-on-git-pull-git-sh-setup-no-such-file-or-directory/24044478
